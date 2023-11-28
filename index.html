@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valoración de Películas</title>
+  <!-- Agrega el enlace a Bootstrap -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body class="bg-light d-flex align-items-center justify-content-center" style="height: 100vh;">
+  <div class="container">
+    <div class="row">
+      <div class="col-md-6 offset-md-3">
+        <h1 class="text-center mb-4">Valoración de Películas</h1>
+        <form action="/valorar" method="post">
+          <div class="form-group">
+            <label for="usuario">Usuario:</label>
+            <input type="text" class="form-control" id="usuario" name="usuario" required>
+          </div>
+          <div class="form-group">
+            <label for="pelicula1">Matrix:</label>
+            <input type="number" min="0" max="10" class="form-control" id="pelicula1" name="pelicula1" required>
+          </div>
+          <div class="form-group">
+            <label for="pelicula2">Dodgeball:</label>
+            <input type="number" min="0" max="10" class="form-control" id="pelicula2" name="pelicula2" required>
+          </div>
+          <div class="form-group">
+            <label for="pelicula3">WWII:</label>
+            <input type="number" min="0" max="10" class="form-control" id="pelicula3" name="pelicula3" required>
+          </div>
+          <div class="form-group">
+            <label for="pelicula4">Pokemon:</label>
+            <input type="number" min="0" max="10" class="form-control" id="pelicula4" name="pelicula4" required>
+          </div>
+          <div class="form-group">
+            <label for="pelicula5">Dr. House:</label>
+            <input type="number" min="0" max="10" class="form-control" id="pelicula5" name="pelicula5" required>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block">Enviar Valoraciones</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

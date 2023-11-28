@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Agrega tus encabezados aquí según sea necesario -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tabla de Resultados</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      padding: 20px;
+    }
+  </style>
+</head>
+<body data-movie-scores='<%= JSON.stringify(movieScores || []) %>'>
+  <h1 class="mt-4 mb-4">Tabla de Resultados</h1>
+  <table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Usuario</th>
+        <th>Matrix</th>
+        <th>Dodgeball</th>
+        <th>WWII</th>
+	<th>Pokemon</th>
+	<th>Dr. House</th>
+      </tr>
+    </thead>
+    <tbody id="table-body">
+      <% movieScores.forEach(entry => { %>
+        <tr>
+          <td><%= entry.usuario %></td>
+          <td><%= entry.pelicula1 %></td>
+          <td><%= entry.pelicula2 %></td>
+          <td><%= entry.pelicula3 %></td>
+          <td><%= entry.pelicula4 %></td>
+          <td><%= entry.pelicula5 %></td>
+        </tr>
+      <% }); %>
+    </tbody>
+  </table>
+
+  <div class="container">
+    <h1 class="mt-4 mb-4">Calcular Distancia</h1>
+
+    <form id="distanceForm">
+        <div class="mb-3">
+            <label for="user1" class="form-label">Usuario 1:</label>
+            <select id="user1" name="user1" class="form-select"></select>
+        </div>
+
+        <div class="mb-3">
+            <label for="user2" class="form-label">Usuario 2:</label>
+            <select id="user2" name="user2" class="form-select"></select>
+        </div>
+
+        <div class="mb-3">
+            <label for="distanceType" class="form-label">Tipo de Distancia:</label>
+            <select id="distanceType" name="distanceType" class="form-select">
+                <option value="manhattan">Manhattan</option>
+                <option value="euclidean">Euclidiana</option>
+		<option value="pearson">Pearson</option>
+                <option value="cosine">Cosenos</option>
+            </select>
+        </div>
+
+        <button type="button" onclick="calculateDistance()" class="btn btn-primary">Calcular Distancia</button>
+        <button type="button" onclick="enviarDatosAPI()" class="btn btn-primary">Calcular Distancia y Recomendar</button>
+    </form>
+
+    <div id="result" class="mt-4"></div>
+    <div id="result2" class="mt-4"></div>
+
+  <!-- Resto del contenido según sea necesario -->
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Agrega otros scripts según sea necesario -->
+</body>
+<script>
+    // Función para obtener las calificaciones de películas de un usuario
+    // Función para obtener las calificaciones de películas de un usuario en MongoDB
+function getMovieRatings(usuario) {
+  const userData = movieScores.find(entry => entry.usuario === usuario);
+  return userData ? userData : {};
+}
+
+    // Función para calcular la distancia de Manhattan entre dos usuarios
+    function manhattanDistance(user1, user2) {
+      const ratings1 = getMovieRatings(user1);
+      const ratings2 = getMovieRatings(user2);
+  
+      if (!ratings1 || !ratings2) {
+        return null; // Al menos un usuario no encontrado
+      }
+  
+      const pel1 = Math.abs(ratings1.pelicula1 - ratings2.pelicula1);
+      const pel2 = Math.abs(ratings1.pelicula2 - ratings2.pelicula2);
+      const pel3 = Math.abs(ratings1.pelicula3 - ratings2.pelicula3);
+  
+      return Math.abs(pel1 + pel2 + pel3);
+    }
+	
+    function pearson(user1, user2) {
+      const ratings1 = getMovieRatings(user1);
+      const ratings2 = getMovieRatings(user2);
+
+      if (!ratings1 || !ratings2) {
+        return null; // Al menos un usuario no encontrado
+      }
+
+      // Calcular medias
+      const med1 = (ratings1.pelicula1 + ratings1.pelicula2 + ratings1.pelicula3) / 3;
+      const med2 = (ratings2.pelicula1 + ratings2.pelicula2 + ratings2.pelicula3) / 3;
+
+      // Calcular numerador y denominador
+      let numerador = 0;
+      let denominador1 = 0;
+      let denominador2 = 0;
+
+      for (const key of ["pelicula1", "pelicula2", "pelicula3"]) {
+        const diff1 = ratings1[key] - med1;
+        const diff2 = ratings2[key] - med2;
+
+        numerador += diff1 * diff2;
+        denominador1 += diff1 ** 2;
+        denominador2 += diff2 ** 2;
+      }
+
+      // Calcular coeficiente de correlación de Pearson
+      const denominador = Math.sqrt(denominador1 * denominador2);
+      if (denominador === 0) {
+        // Manejar el caso de denominador igual a cero para evitar la división por cero
+        return 0;
+      }
+
+      const pearsonCoefficient = numerador / denominador;
+      return pearsonCoefficient;
+    }
+
+    function cosineSimilarity(user1, user2) {
+      const ratings1 = getMovieRatings(user1);
+      const ratings2 = getMovieRatings(user2);
+
+      if (!ratings1 || !ratings2) {
+        return null; // Al menos un usuario no encontrado
+      }
+
+      const numerator = ratings1.pelicula1 * ratings2.pelicula1 +
+                        ratings1.pelicula2 * ratings2.pelicula2 +
+                        ratings1.pelicula3 * ratings2.pelicula3;
+
+      const denominator = Math.sqrt(
+        Math.pow(ratings1.pelicula1, 2) + Math.pow(ratings1.pelicula2, 2) + Math.pow(ratings1.pelicula3, 2)
+      ) * Math.sqrt(
+        Math.pow(ratings2.pelicula1, 2) + Math.pow(ratings2.pelicula2, 2) + Math.pow(ratings2.pelicula3, 2)
+      );
+
+      if (denominator === 0) {
+        return 0; // Evitar división por cero
+      }
+
+      const similarity = numerator / denominator;
+      return similarity;
+    }   
+ 
+    // Función para calcular la distancia euclidiana entre dos usuarios
+    function euclideanDistance(user1, user2) {
+      const ratings1 = getMovieRatings(user1);
+      const ratings2 = getMovieRatings(user2);
+
+      console.log('User1:', user1, 'Ratings1:', ratings1);
+      console.log('User2:', user2, 'Ratings2:', ratings2);
+
+      if (!ratings1 || !ratings2) {
+        return null; // Al menos un usuario no encontrado
+      }
+
+      // Convertir calificaciones a números
+      const numRatings1 = {
+        pelicula1: parseInt(ratings1.pelicula1),
+        pelicula2: parseInt(ratings1.pelicula2),
+        pelicula3: parseInt(ratings1.pelicula3),
+        pelicula4: parseInt(ratings1.pelicula4),
+        pelicula5: parseInt(ratings1.pelicula5),
+      };
+
+      const numRatings2 = {
+        pelicula1: parseInt(ratings2.pelicula1),
+        pelicula2: parseInt(ratings2.pelicula2),
+        pelicula3: parseInt(ratings2.pelicula3),
+        pelicula4: parseInt(ratings1.pelicula4),
+        pelicula5: parseInt(ratings1.pelicula5),
+      };
+
+      console.log('NumRatings1:', numRatings1);
+      console.log('NumRatings2:', numRatings2);
+
+      // Calcular la distancia euclidiana
+      const squaredDifference = Math.pow((numRatings1.pelicula1 - numRatings2.pelicula1), 2) +
+                              Math.pow((numRatings1.pelicula2 - numRatings2.pelicula2), 2) +
+                              Math.pow((numRatings1.pelicula3 - numRatings2.pelicula3), 2) + 
+                              Math.pow((numRatings1.pelicula4 - numRatings2.pelicula4), 2) + 
+                              Math.pow((numRatings1.pelicula5 - numRatings2.pelicula5), 2);
+
+      const distance = Math.sqrt(squaredDifference);
+
+      console.log('Distancia Euclidiana entre', user1, 'y', user2, ':', distance);
+
+      return distance;
+    }
+
+    // Función para calcular la distancia y mostrar el resultado
+    function calculateDistance() {
+      const user1 = document.getElementById('user1').value;
+      const user2 = document.getElementById('user2').value;
+      const distanceType = document.getElementById('distanceType').value;
+  
+      // Calcula la distancia según el tipo seleccionado
+      let distance;
+      if (distanceType === 'manhattan') {
+        distance = manhattanDistance(user1, user2);
+      } else if (distanceType === 'euclidean') {
+        distance = euclideanDistance(user1, user2);
+      } else if (distanceType === 'pearson') {
+        distance = pearson(user1, user2);
+      } else if (distanceType === 'cosine') {
+        distance = cosineSimilarity(user1, user2);
+      } else {
+        // Manejar otros tipos de distancia si es necesario
+        distance = 0;
+      }
+  
+      distance = distance.toFixed(4);
+      // Muestra el resultado
+      const resultDiv = document.getElementById('result');
+      resultDiv.innerHTML = `<p>Distancia ${distanceType} entre ${user1} y ${user2}: ${distance}</p>`;
+    }
+
+    var movieScores = JSON.parse(document.body.getAttribute('data-movie-scores'));
+
+    function fillComboBoxes() {
+        const userSelects = document.querySelectorAll('select[name^="user"]');
+        console.log(movieScores);
+        movieScores.forEach(entry => {
+            userSelects.forEach(select => {
+                const option = document.createElement('option');
+                option.value = entry.usuario;
+                option.text = entry.usuario;
+                select.add(option);
+            });
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', function () {
+        fillComboBoxes();
+    });
+
+    
+    function enviarDatosAPI() {
+      const user1 = document.getElementById('user1').value;
+      const url = 'http://flask/procesar';
+
+      // Realiza la solicitud POST con fetch
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(getMovieRatings(user1)),
+      })
+      .then(response => response.json())
+      .then(data => {
+        // Muestra el usuario enviado y los resultados en el navegador
+        console.log('Usuario enviado:', getMovieRatings(user1));
+        console.log('Respuesta del servidor:', data);
+
+        // Guarda los resultados en variables (puedes ajustar los nombres de las variables según sea necesario)
+        const vecinoMasCercano = data.vecino_mas_cercano.usuario;
+        const peliculaRecomendada = data.pelicula_recomendada;
+
+        // Hacer lo que necesites con las variables
+        console.log('Vecino más cercano:', vecinoMasCercano);
+        console.log('Película recomendada:', peliculaRecomendada);
+        const resultDiv = document.getElementById('result2');
+        resultDiv.innerHTML = `<p>Vecino más cercano: ${vecinoMasCercano} y pelicula recomendada: ${peliculaRecomendada}</p>`;
+      })
+      .catch(error => {
+        console.error('Error al enviar datos:', error.message);
+      });
+    }
+
+
+  </script>
+</html>

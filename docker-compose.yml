@@ -1,0 +1,64 @@
+version: '3'
+
+services:
+  worker:
+    build:
+      context: ./worker
+      dockerfile: Dockerfile
+    networks:
+      - my_network
+    depends_on:
+      - redis
+      - mongo
+
+  vote:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    networks:
+      - my_network
+    depends_on:
+      - redis
+    ports:
+      - "3000:3000"
+  
+  flask:
+    build:
+      context: ./flask
+      dockerfile: Dockerfile
+    container_name: "flask"
+    networks:
+      - my_network
+    ports:
+      - "5000:5000"
+
+  result:
+    build:
+      context: ./result
+      dockerfile: Dockerfile
+    networks:
+      - my_network
+    depends_on:
+      - mongo
+      - flask
+    ports:
+      - "3001:3001"
+
+  redis:
+    image: "redis:latest"
+    container_name: "redis-server"
+    networks:
+      - my_network
+    ports:
+      - "6739:6739"
+  mongo:
+    image: "mongo:latest"
+    container_name: "mongo"
+    networks:
+      - my_network
+    ports:
+       - "27017:27017"
+
+networks:
+  my_network:
+    driver: bridge
