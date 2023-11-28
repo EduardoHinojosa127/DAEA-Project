@@ -76,6 +76,7 @@
   <!-- Agrega otros scripts según sea necesario -->
 </body>
 <script>
+
     // Función para obtener las calificaciones de películas de un usuario
     // Función para obtener las calificaciones de películas de un usuario en MongoDB
 function getMovieRatings(usuario) {
@@ -256,39 +257,42 @@ function getMovieRatings(usuario) {
     });
 
     
+    // Importa Axios
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js';
+      script.async = true;
+      document.head.appendChild(script);
+    })();
+
+
     function enviarDatosAPI() {
       const user1 = document.getElementById('user1').value;
-      const url = 'http://flask/procesar';
+      const url = 'http://flask-container:5000/procesar';
 
-      // Realiza la solicitud POST con fetch
-      fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(getMovieRatings(user1)),
-      })
-      .then(response => response.json())
-      .then(data => {
-        // Muestra el usuario enviado y los resultados en el navegador
-        console.log('Usuario enviado:', getMovieRatings(user1));
-        console.log('Respuesta del servidor:', data);
+      // Realiza la solicitud POST con Axios
+      axios.post(url, getMovieRatings(user1))
+        .then(response => {
+          // Muestra el usuario enviado y los resultados en la consola
+          console.log('Usuario enviado:', getMovieRatings(user1));
+          console.log('Respuesta del servidor:', response.data);
 
-        // Guarda los resultados en variables (puedes ajustar los nombres de las variables según sea necesario)
-        const vecinoMasCercano = data.vecino_mas_cercano.usuario;
-        const peliculaRecomendada = data.pelicula_recomendada;
+          // Guarda los resultados en variables (puedes ajustar los nombres según sea necesario)
+          const vecinoMasCercano = response.data.vecino_mas_cercano.usuario;
+          const peliculaRecomendada = response.data.pelicula_recomendada;
 
-        // Hacer lo que necesites con las variables
-        console.log('Vecino más cercano:', vecinoMasCercano);
-        console.log('Película recomendada:', peliculaRecomendada);
-        const resultDiv = document.getElementById('result2');
-        resultDiv.innerHTML = `<p>Vecino más cercano: ${vecinoMasCercano} y pelicula recomendada: ${peliculaRecomendada}</p>`;
-      })
-      .catch(error => {
-        console.error('Error al enviar datos:', error.message);
-      });
+          // Hacer lo que necesites con las variables
+          console.log('Vecino más cercano:', vecinoMasCercano);
+          console.log('Película recomendada:', peliculaRecomendada);
+
+          const resultDiv = document.getElementById('result2');
+          resultDiv.innerHTML = `<p>Vecino más cercano: ${vecinoMasCercano} y película recomendada: ${peliculaRecomendada}</p>`;
+        })
+        .catch(error => {
+          console.error('Error al enviar datos:', error.message);
+        });
     }
 
-
   </script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </html>
