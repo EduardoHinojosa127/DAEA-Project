@@ -42,7 +42,7 @@
   <div class="container">
     <h1 class="mt-4 mb-4">Calcular Distancia</h1>
 
-    <form id="distanceForm">
+    <form id="distanceForm" action="/enviar-datos" method="POST">
         <div class="mb-3">
             <label for="user1" class="form-label">Usuario 1:</label>
             <select id="user1" name="user1" class="form-select"></select>
@@ -58,17 +58,33 @@
             <select id="distanceType" name="distanceType" class="form-select">
                 <option value="manhattan">Manhattan</option>
                 <option value="euclidean">Euclidiana</option>
-		<option value="pearson">Pearson</option>
+		            <option value="pearson">Pearson</option>
                 <option value="cosine">Cosenos</option>
             </select>
         </div>
 
         <button type="button" onclick="calculateDistance()" class="btn btn-primary">Calcular Distancia</button>
-        <button type="button" onclick="enviarDatosAPI()" class="btn btn-primary">Calcular Distancia y Recomendar</button>
+        <button type="submit" class="btn btn-primary">Calcular Distancia y Recomendar</button>
     </form>
 
     <div id="result" class="mt-4"></div>
-    <div id="result2" class="mt-4"></div>
+   <!-- ... -->
+<!-- ... -->
+
+<% if (respuesta && respuesta.vecino_mas_cercano && respuesta.pelicula_recomendada) { %>
+  <p>Usuario: <%= respuesta.usuario_recibido %></p>
+  <p>Vecino más cercano: <%= respuesta.vecino_mas_cercano.usuario %></p>
+  <p>Película recomendada: <%= respuesta.pelicula_recomendada %></p>
+<% } else { %>
+  <p></p>
+<% } %>
+
+<!-- ... -->
+
+
+
+<!-- ... -->
+
 
   <!-- Resto del contenido según sea necesario -->
 
@@ -256,43 +272,6 @@ function getMovieRatings(usuario) {
         fillComboBoxes();
     });
 
-    
-    // Importa Axios
-    (function() {
-      var script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js';
-      script.async = true;
-      document.head.appendChild(script);
-    })();
-
-
-    function enviarDatosAPI() {
-      const user1 = document.getElementById('user1').value;
-      const url = 'http://flask-container:5000/procesar';
-
-      // Realiza la solicitud POST con Axios
-      axios.post(url, getMovieRatings(user1))
-        .then(response => {
-          // Muestra el usuario enviado y los resultados en la consola
-          console.log('Usuario enviado:', getMovieRatings(user1));
-          console.log('Respuesta del servidor:', response.data);
-
-          // Guarda los resultados en variables (puedes ajustar los nombres según sea necesario)
-          const vecinoMasCercano = response.data.vecino_mas_cercano.usuario;
-          const peliculaRecomendada = response.data.pelicula_recomendada;
-
-          // Hacer lo que necesites con las variables
-          console.log('Vecino más cercano:', vecinoMasCercano);
-          console.log('Película recomendada:', peliculaRecomendada);
-
-          const resultDiv = document.getElementById('result2');
-          resultDiv.innerHTML = `<p>Vecino más cercano: ${vecinoMasCercano} y película recomendada: ${peliculaRecomendada}</p>`;
-        })
-        .catch(error => {
-          console.error('Error al enviar datos:', error.message);
-        });
-    }
 
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 </html>

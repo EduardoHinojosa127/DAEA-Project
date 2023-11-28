@@ -25,8 +25,7 @@ services:
   flask:
     build:
       context: ./flask
-      dockerfile: Dockerfile
-    container_name: "flask-container"
+      dockerfile: Dockerfil
     networks:
       -  my_network
     ports:
@@ -40,7 +39,6 @@ services:
       - my_network
     depends_on:
       - mongo
-      - flask
     ports:
       - "3001:3001"
 

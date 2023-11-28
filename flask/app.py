@@ -36,7 +36,8 @@ def procesar():
         # Preparar la respuesta
         respuesta = {
             'vecino_mas_cercano': vecino_mas_cercano,
-            'pelicula_recomendada': pelicula_recomendada
+            'pelicula_recomendada': pelicula_recomendada,
+	    'usuario_recibido': user_data['usuario'],
         }
 
         return jsonify(respuesta)
@@ -58,4 +59,5 @@ def obtener_pelicula_recomendada(vecino):
     return pelicula_recomendada
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
+
