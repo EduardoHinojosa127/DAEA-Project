@@ -17,7 +17,7 @@ instancias = ["http://54.161.217.131:5000/procesar", "http://34.200.70.170:5000/
 def procesar():
     try:
         user_data = request.json
-        print('Usuario recibido:', user_data)
+        app.logger.info('Usuario recibido: %s', user_data)
 
         # Eliminar la clave '_id' del usuario recibido
         user_data.pop('_id', None)
@@ -33,17 +33,22 @@ def procesar():
         vecino_mas_cercano_index = np.argmin(distancias)
 
         vecino_mas_cercano = data.iloc[vecino_mas_cercano_index].to_dict()
-        print(f'Distancia de la instancia propia: {distancias[vecino_mas_cercano_index]}')
+
+        # Imprimir la distancia calculada por la instancia actual
+        app.logger.info('Distancia calculada por la instancia actual: %s', distancias[vecino_mas_cercano_index])
+
         # Lógica para comparar distancias con las otras instancias
         for instancia_url in instancias:
             otra_instancia_response = requests.post(instancia_url, json=user_data)
             otra_instancia_data = otra_instancia_response.json()
             vecino_mas_cercano_otra_instancia = otra_instancia_data.get('vecino_mas_cercano', {})
             distancia_vecino_otra_instancia = otra_instancia_data.get('distancia_del_vecino_mas_cercano')
-            print(f'Vecino mas cercano de la instancia en {instancia_url}: {vecino_mas_cercano_otra_instancia}')
-            print(f'Distancia al vecino más cercano de la instancia en {instancia_url}: {distancia_vecino_otra_instancia}')
 
-            # Comparar distancias y seleccionar el vecino más cercano final
+            # Imprimir información de la otra instancia
+            app.logger.info('Vecino mas cercano de la instancia en %s: %s', instancia_url, vecino_mas_cercano_otra_instancia)
+            app.logger.info('Distancia al vecino más cercano de la instancia en %s: %s', instancia_url, distancia_vecino_otra_instancia)
+
+            # Comparar distancias y asignar el nuevo vecino y la nueva distancia
             if distancia_vecino_otra_instancia < distancias[vecino_mas_cercano_index]:
                 vecino_mas_cercano = vecino_mas_cercano_otra_instancia
                 distancias[vecino_mas_cercano_index] = distancia_vecino_otra_instancia
@@ -61,7 +66,7 @@ def procesar():
         return jsonify(respuesta)
 
     except Exception as e:
-        print('Error en la función procesar:', str(e))
+        app.logger.error('Error en la función procesar: %s', str(e))
         return jsonify({'error': 'Error interno'}), 500
 
 def obtener_pelicula_recomendada(vecino):

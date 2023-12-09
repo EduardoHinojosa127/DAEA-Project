@@ -54,8 +54,18 @@ app.post('/enviar-datos', async (req, res) => {
     console.log(usuarioEncontrado[0])
 
     if (usuarioEncontrado) {
-
+      
+      const startTime = new Date();
       const respuestaAPI = await axios.post('http://flask-container:5000/procesar', usuarioEncontrado[0]);
+  
+      // Obtén la fecha y hora de finalización
+      const endTime = new Date();
+
+      // Calcula el tiempo de ejecución en milisegundos
+      const executionTimeInMilliseconds = endTime - startTime;
+
+      // Imprime el tiempo de ejecución
+      console.log(`Tiempo de ejecución del POST: ${executionTimeInMilliseconds} ms`);
 
       // Manejar la respuesta de la API según sea necesario
       console.log('Respuesta del servidor:', respuestaAPI.data);
